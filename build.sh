@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.7"
+VERSION="1.8"
 
 help() {
     echo "Version v"$VERSION
@@ -19,6 +19,7 @@ help() {
     echo "-c: Delete \"build\" and \"build_test\" folders under the project directory."
     echo "-d: Connect to XiangShan difftest framework."
     echo "-m: Parameters passed to the difftest makefile. For example: -m \"EMU_TRACE=1 EMU_THREADS=4\". Multiple parameters require double quotes."
+    echo "-r: Run all test cases in the \"bin\" directory. This option requires the project to be able to connect to difftest."
     exit 0
 }
 
@@ -109,9 +110,10 @@ DIFFTEST_TOP_FILE="SimTop.v"
 NEMU_FOLDER="NEMU"
 DIFFTEST_HELPER_PATH="src/test/vsrc/common"
 DIFFTEST_PARAM=
+RUNALL="false"
 
 # Check parameters
-while getopts 'he:bt:sa:f:l:gwcdm:' OPT; do
+while getopts 'he:bt:sa:f:l:gwcdm:r' OPT; do
     case $OPT in
         h) help;;
         e) PROJECT_FOLDER="$OPTARG";;
@@ -126,9 +128,14 @@ while getopts 'he:bt:sa:f:l:gwcdm:' OPT; do
         c) CLEAN="true";;
         d) DIFFTEST="true";;
         m) DIFFTEST_PARAM="$OPTARG";;
+        r) RUNALL="true";;
         ?) help;;
     esac
 done
+
+if [[ $RUNALL == "true" ]]; then
+    DIFFTEST="true"
+fi
 
 if [[ $LDFLAGS ]]; then
     LDFLAGS="-LDFLAGS "\"$LDFLAGS\"
@@ -207,4 +214,29 @@ fi
 
 if [[ "$FAILED" == "true" ]]; then
     exit 1
+fi
+
+# Run all
+if [[ $RUNALL == "true" ]]; then
+    cd $BUILD_PATH
+
+    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\"
+
+    mkdir log 1>/dev/null 2>&1
+    BIN_FILES=`ls *.bin`
+
+    for BIN_FILE in $BIN_FILES; do
+        FILE_NAME=${BIN_FILE%.*}
+        printf "[%30s] " $FILE_NAME
+        LOG_FILE=log/$FILE_NAME-log.txt
+        ./$EMU_FILE -i $BIN_FILE &> $LOG_FILE
+        if (grep 'HIT GOOD TRAP' $LOG_FILE > /dev/null) then
+            echo -e "\033[1;32mPASS!\033[0m"
+            rm $LOG_FILE
+        else
+            echo -e "\033[1;31mFAIL!\033[0m see $BUILD_PATH/$LOG_FILE for more information"
+        fi
+    done
+
+    cd $OSCPU_PATH
 fi
