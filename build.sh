@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.8"
+VERSION="1.9"
 
 help() {
     echo "Version v"$VERSION
@@ -42,10 +42,16 @@ build_diff_proj() {
     eval "ln -s \"`realpath --relative-to="$OSCPU_PATH/$DIFFTEST_FOLDER" "$PROJECT_PATH"`/$DIFFTEST_FOLDER\" \"$PROJECT_PATH/$DIFFTEST_FOLDER\" 1>/dev/null 2>&1"
 
     cd $OSCPU_PATH/$DIFFTEST_FOLDER
-    # compile
+    # compile nemu
+    make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
+    if [ $? -ne 0 ]; then
+        echo "Failed to build nemu!!!"
+        exit 1
+    fi
+    # compile difftest
     make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
     if [ $? -ne 0 ]; then
-        echo "Failed to run verilator!!!"
+        echo "Failed to build difftest!!!"
         exit 1
     fi
     cd $OSCPU_PATH
