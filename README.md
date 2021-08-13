@@ -148,7 +148,7 @@ Enter the test cycle:
 ./build.sh -e cpu_diff -d -b -s -a "-i inst_diff.bin --dump-wave -b 0" -m "EMU_TRACE=1" 
 ```
 
-仿真程序运行后，终端将打印绿色的提示内容`HIT GOOD TRAP at pc = 0x8000000c`。说明程序运行到自定义的0x6b指令，并且此时存放错误码的`a0`寄存器的值为0，即程序按照预期结果成功退出。关于0x6b自定义指令作用，可参考[讲座-AM运行环境介绍](https://oscpu.github.io/ysyx/events/events.html?EID=2021-07-13_AM_Difftest)。如果指定输出波形，将在`projects/cpu_diff/build/`路径下生成`.vcd`波形文件。
+仿真程序运行后，终端将打印绿色的提示内容`HIT GOOD TRAP at pc = 0x8000000c`。说明程序运行到自定义的`0x6b`指令，并且此时存放错误码的`a0`寄存器的值为0，即程序按照预期结果成功退出。关于`0x6b`自定义指令作用，可参考[讲座-AM运行环境介绍](https://oscpu.github.io/ysyx/events/events.html?EID=2021-07-13_AM_Difftest)。如果指定输出波形，将在`projects/cpu_diff/build/`路径下生成`.vcd`波形文件。
 
 ### cpu_axi_diff
 
