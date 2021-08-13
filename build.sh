@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.9"
+VERSION="1.10"
 
 help() {
     echo "Version v"$VERSION
@@ -14,7 +14,7 @@ help() {
     echo "-a: Parameters passed to the simulation program. For example: -a \"1 2 3 ......\". Multiple parameters require double quotes."
     echo "-f: C++ compiler arguments for makefile. For example: -f \"-DGLOBAL_DEFINE=1 -ggdb3\". Multiple parameters require double quotes. This option is invalid when connected difftest."
     echo "-l: C++ linker arguments for makefile. For example: -l \"-ldl -lm\". Multiple parameters require double quotes. This option is invalid when connected difftest."
-    echo "-g: Debug the simulation program with GDB."
+    echo "-g: Debug the simulation program with GDB. This option is invalid when connected difftest."
     echo "-w: Open the latest waveform file(.vcd) using gtkwave under work path. Use the \"build_test\" or \"build\"(difftest) folder as work path."
     echo "-c: Delete \"build\" and \"build_test\" folders under the project directory."
     echo "-d: Connect to XiangShan difftest framework."
@@ -33,6 +33,36 @@ create_soft_link() {
     done
 }
 
+compile_dramsim3() {
+    if [[ ! -f $OSCPU_PATH/$DRAMSIM3_FOLDER/build/libdramsim3.a ]]; then
+        mkdir $OSCPU_PATH/$DRAMSIM3_FOLDER/build
+        cd $OSCPU_PATH/$DRAMSIM3_FOLDER/build
+        cmake -D COSIM=1 ..
+        make
+        cd $OSCPU_PATH
+    fi
+}
+
+compile_nemu() {
+    cd $OSCPU_PATH/$DIFFTEST_FOLDER
+    make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
+    if [ $? -ne 0 ]; then
+        echo "Failed to build nemu!!!"
+        exit 1
+    fi
+    cd $OSCPU_PATH
+}
+
+compile_difftest() {
+    cd $OSCPU_PATH/$DIFFTEST_FOLDER
+    make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
+    if [ $? -ne 0 ]; then
+        echo "Failed to build difftest!!!"
+        exit 1
+    fi
+    cd $OSCPU_PATH
+}
+
 build_diff_proj() {
     # Refresh the modification time of the top file, otherwise some changes to the RTL source code will not take effect in next compilation.
     touch -m `find $BUILD_PATH -name $DIFFTEST_TOP_FILE` 1>/dev/null 2>&1
@@ -41,20 +71,9 @@ build_diff_proj() {
     # create soft link ($PROJECT_PATH/difftest -> $OSCPU_PATH/difftest)
     eval "ln -s \"`realpath --relative-to="$OSCPU_PATH/$DIFFTEST_FOLDER" "$PROJECT_PATH"`/$DIFFTEST_FOLDER\" \"$PROJECT_PATH/$DIFFTEST_FOLDER\" 1>/dev/null 2>&1"
 
-    cd $OSCPU_PATH/$DIFFTEST_FOLDER
-    # compile nemu
-    make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
-    if [ $? -ne 0 ]; then
-        echo "Failed to build nemu!!!"
-        exit 1
-    fi
-    # compile difftest
-    make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
-    if [ $? -ne 0 ]; then
-        echo "Failed to build difftest!!!"
-        exit 1
-    fi
-    cd $OSCPU_PATH
+    compile_dramsim3
+    compile_nemu
+    compile_difftest
 }
 
 build_proj() {
@@ -81,7 +100,7 @@ build_proj() {
 
     # compile
     mkdir $BUILD_FOLDER 1>/dev/null 2>&1
-    eval "verilator --cc --exe --trace --assert -O3 -CFLAGS \"-std=c++11 -Wall $INCLUDE_CSRC_FOLDERS $CFLAGS\" $LDFLAGS -o $PROJECT_PATH/$BUILD_FOLDER/$EMU_FILE \
+    eval "verilator --x-assign unique --cc --exe --trace --assert -O3 -CFLAGS \"-std=c++11 -Wall $INCLUDE_CSRC_FOLDERS $CFLAGS\" $LDFLAGS -o $PROJECT_PATH/$BUILD_FOLDER/$EMU_FILE \
         -Mdir $PROJECT_PATH/$BUILD_FOLDER/emu-compile $INCLUDE_VSRC_FOLDERS --build $V_TOP_FILE $CSRC_FILES"
     if [ $? -ne 0 ]; then
         echo "Failed to run verilator!!!"
@@ -111,12 +130,13 @@ CFLAGS=
 LDFLAGS=
 GDB="false"
 DIFFTEST="false"
-DIFFTEST_FOLDER="difftest"
+DIFFTEST_FOLDER="libraries/difftest"
 DIFFTEST_TOP_FILE="SimTop.v"
-NEMU_FOLDER="NEMU"
+NEMU_FOLDER="libraries/NEMU"
 DIFFTEST_HELPER_PATH="src/test/vsrc/common"
 DIFFTEST_PARAM=
 RUNALL="false"
+DRAMSIM3_FOLDER="libraries/DRAMsim3"
 
 # Check parameters
 while getopts 'he:bt:sa:f:l:gwcdm:r' OPT; do
@@ -139,21 +159,15 @@ while getopts 'he:bt:sa:f:l:gwcdm:r' OPT; do
     esac
 done
 
-if [[ $RUNALL == "true" ]]; then
-    DIFFTEST="true"
-fi
-
-if [[ $LDFLAGS ]]; then
-    LDFLAGS="-LDFLAGS "\"$LDFLAGS\"
-fi
+[[ $RUNALL == "true" ]] && DIFFTEST="true"
+[[ $LDFLAGS ]] && LDFLAGS="-LDFLAGS "\"$LDFLAGS\"
 
 PROJECT_PATH=$OSCPU_PATH/projects/$PROJECT_FOLDER
 [[ "$DIFFTEST" == "true" ]] && BUILD_PATH=$PROJECT_PATH/$DIFF_BUILD_FOLDER || BUILD_PATH=$PROJECT_PATH/$BUILD_FOLDER
-if [[ "$DIFFTEST" == "true" ]]; then
-    V_TOP_FILE=$DIFFTEST_TOP_FILE
-    export NEMU_HOME=$OSCPU_PATH/$NEMU_FOLDER
-    export NOOP_HOME=$PROJECT_PATH
-fi
+[[ "$DIFFTEST" == "true" ]] && V_TOP_FILE=$DIFFTEST_TOP_FILE
+export NEMU_HOME=$OSCPU_PATH/$NEMU_FOLDER
+export NOOP_HOME=$PROJECT_PATH
+export DRAMSIM3_HOME=$OSCPU_PATH/$DRAMSIM3_FOLDER
 
 # Get id and name
 ID=`sed '/^ID=/!d;s/.*=//' $MYINFO_FILE`
@@ -168,9 +182,7 @@ NAME="${NAME##*\r}"
 # Clean
 if [[ "$CLEAN" == "true" ]]; then
     rm -rf $BUILD_PATH
-    if [[ "$DIFFTEST" == "true" ]]; then
-        unlink $PROJECT_PATH/$DIFFTEST_FOLDER 1>/dev/null 2>&1
-    fi
+    [[ "$DIFFTEST" == "true" ]] && unlink $PROJECT_PATH/$DIFFTEST_FOLDER 1>/dev/null 2>&1
     exit 0
 fi
 
@@ -193,11 +205,7 @@ if [[ "$SIMULATE" == "true" ]]; then
 
     # run simulation program
     echo "Simulating..."
-    if [[ "$GDB" == "true" ]]; then
-        gdb -s $EMU_FILE --args ./$EMU_FILE $PARAMETERS
-    else
-        ./$EMU_FILE $PARAMETERS
-    fi
+    [[ "$GDB" == "true" ]] && gdb -s $EMU_FILE --args ./$EMU_FILE $PARAMETERS || ./$EMU_FILE $PARAMETERS
 
     if [ $? -ne 0 ]; then
         echo "Failed to simulate!!!"
@@ -218,9 +226,7 @@ if [[ "$CHECK_WAVE" == "true" ]]; then
     cd $OSCPU_PATH
 fi
 
-if [[ "$FAILED" == "true" ]]; then
-    exit 1
-fi
+[[ "$FAILED" == "true" ]] && exit 1
 
 # Run all
 if [[ $RUNALL == "true" ]]; then

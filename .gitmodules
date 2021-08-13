@@ -1,6 +1,9 @@
-[submodule "difftest"]
-	path = difftest
+[submodule "libraries/difftest"]
+	path = libraries/difftest
 	url = https://github.com/OpenXiangShan/difftest.git
-[submodule "NEMU"]
-	path = NEMU
+[submodule "libraries/NEMU"]
+	path = libraries/NEMU
 	url = https://github.com/OpenXiangShan/NEMU.git
+[submodule "libraries/DRAMsim3"]
+	path = libraries/DRAMsim3
+	url = https://github.com/OpenXiangShan/DRAMsim3.git
