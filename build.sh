@@ -14,7 +14,7 @@ help() {
     echo "-a: Parameters passed to the simulation program. For example: -a \"1 2 3 ......\". Multiple parameters require double quotes."
     echo "-f: C++ compiler arguments for makefile. For example: -f \"-DGLOBAL_DEFINE=1 -ggdb3\". Multiple parameters require double quotes. This option is invalid when connected difftest."
     echo "-l: C++ linker arguments for makefile. For example: -l \"-ldl -lm\". Multiple parameters require double quotes. This option is invalid when connected difftest."
-    echo "-g: Debug the simulation program with GDB. This option is invalid when connected difftest."
+    echo "-g: Debug the simulation program with GDB."
     echo "-w: Open the latest waveform file(.vcd) using gtkwave under work path. Use the \"build_test\" or \"build\"(difftest) folder as work path."
     echo "-c: Delete \"build\" and \"build_test\" folders under the project directory."
     echo "-d: Connect to XiangShan difftest framework."
