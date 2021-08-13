@@ -193,7 +193,7 @@ Enter the test cycle:
 
 [cpu-tests](https://github.com/NJU-ProjectN/am-kernels)
 
-[riscv-test](https://github.com/NJU-ProjectN/riscv-tests)
+[riscv-tests](https://github.com/NJU-ProjectN/riscv-tests)
 
 [香山difftest框架](https://github.com/OpenXiangShan/difftest)
 
