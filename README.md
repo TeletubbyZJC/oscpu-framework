@@ -98,7 +98,7 @@ make clean
 -a 传入仿真程序的参数，比如：-a "1 2 3 ......"，多个参数需要使用双引号
 -f 传入c++编译器的参数，比如：-f "-DGLOBAL_DEFINE=1 -ggdb3"，多个参数需要使用双引号，该参数在接入difftest时无效
 -l 传入c++链接器的参数，比如：-l "-ldl -lm"，多个参数需要使用双引号，该参数在接入difftest时无效
--g 使用gdb调试仿真程序，该参数在接入difftest时无效
+-g 使用gdb调试仿真程序
 -w 使用gtkwave打开工作目录下修改时间最新的.vcd波形文件
 -c 删除工程目录下编译生成的"build"文件夹
 -d 接入香山difftest框架
