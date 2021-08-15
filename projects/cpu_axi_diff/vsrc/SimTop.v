@@ -35,7 +35,6 @@ module SimTop(
     output [`AXI_DATA_WIDTH-1:0]        `AXI_TOP_INTERFACE(w_bits_data)         [3:0],
     output [`AXI_DATA_WIDTH/8-1:0]      `AXI_TOP_INTERFACE(w_bits_strb),
     output                              `AXI_TOP_INTERFACE(w_bits_last),
-    output [`AXI_ID_WIDTH-1:0]          `AXI_TOP_INTERFACE(w_bits_id),
     
     output                              `AXI_TOP_INTERFACE(b_ready),
     input                               `AXI_TOP_INTERFACE(b_valid),
@@ -83,7 +82,6 @@ module SimTop(
     wire [`AXI_DATA_WIDTH-1:0] w_data [0:0];
     wire [`AXI_DATA_WIDTH/8-1:0] w_strb;
     wire w_last;
-    wire [`AXI_ID_WIDTH-1:0] w_id;
     
     wire b_ready;
     wire b_valid;
@@ -164,7 +162,6 @@ module SimTop(
         .axi_w_data_o                   (w_data[0]),
         .axi_w_strb_o                   (w_strb),
         .axi_w_last_o                   (w_last),
-        .axi_w_id_o                     (w_id),
         
         .axi_b_ready_o                  (b_ready),
         .axi_b_valid_i                  (b_valid),

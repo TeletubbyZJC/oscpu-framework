@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.10"
+VERSION="1.11"
 
 help() {
     echo "Version v"$VERSION
@@ -14,7 +14,7 @@ help() {
     echo "-a: Parameters passed to the simulation program. For example: -a \"1 2 3 ......\". Multiple parameters require double quotes."
     echo "-f: C++ compiler arguments for makefile. For example: -f \"-DGLOBAL_DEFINE=1 -ggdb3\". Multiple parameters require double quotes. This option is invalid when connected difftest."
     echo "-l: C++ linker arguments for makefile. For example: -l \"-ldl -lm\". Multiple parameters require double quotes. This option is invalid when connected difftest."
-    echo "-g: Debug the simulation program with GDB."
+    echo "-g: Debug the simulation program with GDB. This option is invalid when connected difftest."
     echo "-w: Open the latest waveform file(.vcd) using gtkwave under work path. Use the \"build_test\" or \"build\"(difftest) folder as work path."
     echo "-c: Delete \"build\" and \"build_test\" folders under the project directory."
     echo "-d: Connect to XiangShan difftest framework."
@@ -33,8 +33,17 @@ create_soft_link() {
     done
 }
 
+install_packages() {
+    for ARG in $*                     
+    do
+      [[ ! `dpkg -l | grep $ARG` ]] && sudo apt-get --yes install $ARG
+    done
+}
+
 compile_dramsim3() {
     if [[ ! -f $OSCPU_PATH/$DRAMSIM3_FOLDER/build/libdramsim3.a ]]; then
+        install_packages cmake
+        [[ ! `dpkg -l | grep cmake` ]] && sudo apt-get --yes install cmake
         mkdir $OSCPU_PATH/$DRAMSIM3_FOLDER/build
         cd $OSCPU_PATH/$DRAMSIM3_FOLDER/build
         cmake -D COSIM=1 ..
@@ -44,13 +53,16 @@ compile_dramsim3() {
 }
 
 compile_nemu() {
-    cd $OSCPU_PATH/$DIFFTEST_FOLDER
-    make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
-    if [ $? -ne 0 ]; then
-        echo "Failed to build nemu!!!"
-        exit 1
+    if [[ ! -f $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so ]]; then
+        install_packages libreadline-dev libsdl2-dev bison
+        cd $OSCPU_PATH/$DIFFTEST_FOLDER
+        make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
+        if [ $? -ne 0 ]; then
+            echo "Failed to build nemu!!!"
+            exit 1
+        fi
+        cd $OSCPU_PATH
     fi
-    cd $OSCPU_PATH
 }
 
 compile_difftest() {

@@ -98,7 +98,7 @@ make clean
 -a 传入仿真程序的参数，比如：-a "1 2 3 ......"，多个参数需要使用双引号
 -f 传入c++编译器的参数，比如：-f "-DGLOBAL_DEFINE=1 -ggdb3"，多个参数需要使用双引号，该参数在接入difftest时无效
 -l 传入c++链接器的参数，比如：-l "-ldl -lm"，多个参数需要使用双引号，该参数在接入difftest时无效
--g 使用gdb调试仿真程序
+-g 使用gdb调试仿真程序，该参数在接入difftest时无效
 -w 使用gtkwave打开工作目录下修改时间最新的.vcd波形文件
 -c 删除工程目录下编译生成的"build"文件夹
 -d 接入香山difftest框架
@@ -174,7 +174,10 @@ Enter the test cycle:
 在实现了能够运行所有`cpu-tests`和`riscv-tests`测试用例的指令后，可以通过以下命令对CPU进行一键回归测试。该命令会将`bin`目录下的所有`.bin`文件作为参数来调用接入了`香山difftest框架`的仿真程序，其中`xxx`表示例程名。
 
 ```
+# 未接入AXI总线
 ./build.sh -e xxx -b -r
+# 接入AXI总线
+./build.sh -e xxx -b -r -m "WITH_DRAMSIM3=1"
 ```
 
 通过测试的用例，将打印`PASS`。测试失败的用例，打印`FAIL`并生成对应的log文件，可以查看log文件来调试，也可以另外开启波形输出来调试。

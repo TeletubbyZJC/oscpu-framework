@@ -88,7 +88,6 @@ module axi_rw # (
     output [AXI_DATA_WIDTH-1:0]         axi_w_data_o,
     output [AXI_DATA_WIDTH/8-1:0]       axi_w_strb_o,
     output                              axi_w_last_o,
-    output [AXI_ID_WIDTH-1:0]           axi_w_id_o,
     
     output                              axi_b_ready_o,
     input                               axi_b_valid_i,
@@ -120,7 +119,7 @@ module axi_rw # (
 
     wire w_trans    = rw_req_i == `REQ_WRITE;
     wire r_trans    = rw_req_i == `REQ_READ;
-    wire w_valid    = rw_valid_i & r_trans;
+    wire w_valid    = rw_valid_i & w_trans;
     wire r_valid    = rw_valid_i & r_trans;
 
     // handshake
@@ -146,7 +145,7 @@ module axi_rw # (
     // Wirte State Machine
     always @(posedge clock) begin
         if (reset) begin
-            w_state <= R_STATE_IDLE;
+            w_state <= W_STATE_IDLE;
         end
         else begin
             if (w_valid) begin
