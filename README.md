@@ -48,44 +48,6 @@ git config --global user.name "2021000001-Zhang San"
 git config --global user.email "zhangsan@foo.com"
 ```
 
-# 编译NEMU
-
-`香山difftest框架`依赖`NEMU`的支持，本项目已经集成`NEMU`和`香山difftest框架`，编译`香山difftest框架`之前，需要安装编译`NEMU`所需的软件包。
-
-```
-sudo apt-get install libreadline-dev libsdl2-dev bison
-```
-
-如果内存小于8G，编译该工程之前，需要修改`NEMU`和`香山difftest框架`的ram大小。
-
-修改`NEMU`的ram大小：
-
-```
-cd libraries/NEMU
-export NEMU_HOME=`pwd`
-make defconfig riscv64-xs-ref_defconfig
-make menuconfig
-#进入Memory Configuration菜单，将Memory size的值修改为0x10000000，回车，保存，退出
-make
-```
-
-修改`香山difftest框架`的ram大小，文件：`libraries/difftest/src/test/csrc/common/ram.h`。
-
-```
-#define EMU_RAM_SIZE (256 * 1024 * 1024UL)
-//#define EMU_RAM_SIZE (8 * 1024 * 1024 * 1024UL)
-```
-
-对于`NEMU`更新后导致的`香山difftest框架`编译或运行报错，可以在清除`NEMU`编译的文件后运行build.sh来重新编译`NEMU`。
-
-```
-cd libraries/NEMU
-export NEMU_HOME=`pwd`
-make clean
-```
-
-对于`香山difftest框架`更新导致的编译或运行报错，也可通过`build.sh`中的`-c`选项删除`build`目录后重新编译工程。
-
 # 例程
 
 我们提供了脚本`build.sh`用于自动化编译、仿真和查看波形。下面是`build.sh`的参数说明，也可在oscpu目录下使用`./build.sh -h`命令查看帮助。

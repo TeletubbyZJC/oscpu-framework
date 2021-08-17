@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.11"
+VERSION="1.12"
 
 help() {
     echo "Version v"$VERSION
@@ -55,8 +55,10 @@ compile_dramsim3() {
 compile_nemu() {
     if [[ ! -f $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so ]]; then
         install_packages libreadline-dev libsdl2-dev bison
-        cd $OSCPU_PATH/$DIFFTEST_FOLDER
-        make $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so
+        cd $OSCPU_PATH/$NEMU_FOLDER
+        make riscv64-xs-ref_defconfig
+        sed -i 's/CONFIG_MSIZE=0x200000000/CONFIG_MSIZE=0x10000000/' .config
+        make
         if [ $? -ne 0 ]; then
             echo "Failed to build nemu!!!"
             exit 1
@@ -67,6 +69,7 @@ compile_nemu() {
 
 compile_difftest() {
     cd $OSCPU_PATH/$DIFFTEST_FOLDER
+    sed -i 's/#define EMU_RAM_SIZE (8 \* 1024 \* 1024 \* 1024UL)/#define EMU_RAM_SIZE (256 \* 1024 \* 1024UL)/' src/test/csrc/common/ram.h
     make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
     if [ $? -ne 0 ]; then
         echo "Failed to build difftest!!!"
