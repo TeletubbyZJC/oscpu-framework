@@ -117,7 +117,7 @@ make clean
 ./build.sh -e counter -b -s
 ```
 
-如果`Verilator `安装正确，你会看到下面的输出
+如果`verilator`安装正确，你会看到下面的输出
 
 ```
 Simulating...
