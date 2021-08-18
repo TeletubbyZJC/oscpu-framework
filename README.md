@@ -69,7 +69,7 @@ git config --global user.email "zhangsan@foo.com"
 
 ## 编译和仿真
 
-`projects`目录下几个例程可用于了解如何基于`Verilator`和`香山difftest框架`来开发仿真CPU。 
+`projects`目录下几个例程可用于了解如何基于`verilator`和`香山difftest框架`来开发仿真CPU。 
 
 ### counter
 
