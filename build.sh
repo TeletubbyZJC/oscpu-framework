@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.12"
+VERSION="1.13"
 
 help() {
     echo "Version v"$VERSION
@@ -48,6 +48,10 @@ compile_dramsim3() {
         cd $OSCPU_PATH/$DRAMSIM3_FOLDER/build
         cmake -D COSIM=1 ..
         make
+        if [ $? -ne 0 ]; then
+            echo "Failed to build dramsim3!!!"
+            exit 1
+        fi
         cd $OSCPU_PATH
     fi
 }
@@ -196,7 +200,7 @@ NAME="${NAME##*\r}"
 
 # Clean
 if [[ "$CLEAN" == "true" ]]; then
-    rm -rf $BUILD_PATH
+    rm -rf $PROJECT_PATH/$BUILD_FOLDER $PROJECT_PATH/$DIFF_BUILD_FOLDER
     [[ "$DIFFTEST" == "true" ]] && unlink $PROJECT_PATH/$DIFFTEST_FOLDER 1>/dev/null 2>&1
     exit 0
 fi
