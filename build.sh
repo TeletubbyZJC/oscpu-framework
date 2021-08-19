@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.13"
+VERSION="1.14"
 
 help() {
     echo "Version v"$VERSION
@@ -57,9 +57,9 @@ compile_dramsim3() {
 }
 
 compile_nemu() {
-    if [[ ! -f $OSCPU_PATH/$NEMU_FOLDER/build/riscv64-nemu-interpreter-so ]]; then
+    if [[ ! -f $NEMU_HOME/build/riscv64-nemu-interpreter-so ]]; then
         install_packages libreadline-dev libsdl2-dev bison
-        cd $OSCPU_PATH/$NEMU_FOLDER
+        cd $NEMU_HOME
         make riscv64-xs-ref_defconfig
         sed -i 's/CONFIG_MSIZE=0x200000000/CONFIG_MSIZE=0x10000000/' .config
         make
@@ -72,7 +72,7 @@ compile_nemu() {
 }
 
 compile_difftest() {
-    cd $OSCPU_PATH/$DIFFTEST_FOLDER
+    cd $DIFFTEST_HOME
     sed -i 's/#define EMU_RAM_SIZE (8 \* 1024 \* 1024 \* 1024UL)/#define EMU_RAM_SIZE (256 \* 1024 \* 1024UL)/' src/test/csrc/common/ram.h
     make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
     if [ $? -ne 0 ]; then
@@ -87,8 +87,8 @@ build_diff_proj() {
     touch -m `find $BUILD_PATH -name $DIFFTEST_TOP_FILE` 1>/dev/null 2>&1
     # create soft link ($BUILD_PATH/*.v -> $PROJECT_PATH/$VSRC_FOLDER/*.v)
     create_soft_link $BUILD_PATH $PROJECT_PATH/$VSRC_FOLDER \"*.v\"
-    # create soft link ($PROJECT_PATH/difftest -> $OSCPU_PATH/difftest)
-    eval "ln -s \"`realpath --relative-to="$OSCPU_PATH/$DIFFTEST_FOLDER" "$PROJECT_PATH"`/$DIFFTEST_FOLDER\" \"$PROJECT_PATH/$DIFFTEST_FOLDER\" 1>/dev/null 2>&1"
+    # create soft link ($PROJECT_PATH/difftest -> $LIBRARIES_HOME/difftest)
+    eval "ln -s \"`realpath --relative-to="$PROJECT_PATH" "$LIBRARIES_HOME"`/$DIFFTEST_FOLDER\" \"$PROJECT_PATH/$DIFFTEST_FOLDER\" 1>/dev/null 2>&1"
 
     compile_dramsim3
     compile_nemu
@@ -148,10 +148,12 @@ PARAMETERS=
 CFLAGS=
 LDFLAGS=
 GDB="false"
+LIBRARIES_FOLDER="libraries"
 DIFFTEST="false"
-DIFFTEST_FOLDER="libraries/difftest"
+DIFFTEST_FOLDER="difftest"
+DIFFTEST_PATH=$LIBRARIES_FOLDER/$DIFFTEST_FOLDER
 DIFFTEST_TOP_FILE="SimTop.v"
-NEMU_FOLDER="libraries/NEMU"
+NEMU_PATH=$LIBRARIES_FOLDER"/NEMU"
 DIFFTEST_HELPER_PATH="src/test/vsrc/common"
 DIFFTEST_PARAM=
 RUNALL="false"
@@ -184,9 +186,13 @@ done
 PROJECT_PATH=$OSCPU_PATH/projects/$PROJECT_FOLDER
 [[ "$DIFFTEST" == "true" ]] && BUILD_PATH=$PROJECT_PATH/$DIFF_BUILD_FOLDER || BUILD_PATH=$PROJECT_PATH/$BUILD_FOLDER
 [[ "$DIFFTEST" == "true" ]] && V_TOP_FILE=$DIFFTEST_TOP_FILE
-export NEMU_HOME=$OSCPU_PATH/$NEMU_FOLDER
+NEMU_HOME=$OSCPU_PATH/$NEMU_PATH
+DIFFTEST_HOME=$OSCPU_PATH/$DIFFTEST_PATH
+DRAMSIM3_HOME=$OSCPU_PATH/$DRAMSIM3_FOLDER
+LIBRARIES_HOME=$OSCPU_PATH/$LIBRARIES_FOLDER
+export NEMU_HOME=$NEMU_HOME
 export NOOP_HOME=$PROJECT_PATH
-export DRAMSIM3_HOME=$OSCPU_PATH/$DRAMSIM3_FOLDER
+export DRAMSIM3_HOME=$DRAMSIM3_HOME
 
 # Get id and name
 ID=`sed '/^ID=/!d;s/.*=//' $MYINFO_FILE`
@@ -201,7 +207,7 @@ NAME="${NAME##*\r}"
 # Clean
 if [[ "$CLEAN" == "true" ]]; then
     rm -rf $PROJECT_PATH/$BUILD_FOLDER $PROJECT_PATH/$DIFF_BUILD_FOLDER
-    [[ "$DIFFTEST" == "true" ]] && unlink $PROJECT_PATH/$DIFFTEST_FOLDER 1>/dev/null 2>&1
+    unlink $PROJECT_PATH/$DIFFTEST_FOLDER 1>/dev/null 2>&1
     exit 0
 fi
 
