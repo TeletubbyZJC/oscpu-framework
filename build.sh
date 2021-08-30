@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.15"
+VERSION="1.16"
 
 help() {
     echo "Version v"$VERSION
@@ -73,7 +73,7 @@ compile_nemu() {
 
 compile_difftest() {
     cd $DIFFTEST_HOME
-    sed -i 's/#define EMU_RAM_SIZE (8 \* 1024 \* 1024 \* 1024UL)/#define EMU_RAM_SIZE (256 \* 1024 \* 1024UL)/' src/test/csrc/common/ram.h
+    sed -i 's/#define EMU_RAM_SIZE (8 \* 1024 \* 1024 \* 1024UL)/#define EMU_RAM_SIZE (256 \* 1024 \* 1024UL)/' config/config.h
     make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
     if [ $? -ne 0 ]; then
         echo "Failed to build difftest!!!"
@@ -218,9 +218,11 @@ if [[ "$BUILD" == "true" ]]; then
     [[ "$DIFFTEST" == "true" ]] && build_diff_proj || build_proj
 
     #git commit
-    git add . -A --ignore-errors
-    (echo $NAME && echo $ID && hostnamectl && uptime) | git commit -F - -q --author='tracer-oscpu2021 <tracer@oscpu.org>' --no-verify --allow-empty 1>/dev/null 2>&1
-    sync
+    if [[ ! -f $OSCPU_PATH/.no_commit ]]; then
+        git add . -A --ignore-errors
+        (echo $NAME && echo $ID && hostnamectl && uptime) | git commit -F - -q --author='tracer-oscpu2021 <tracer@oscpu.org>' --no-verify --allow-empty 1>/dev/null 2>&1
+        sync
+    fi
 fi
 
 # Simulate
