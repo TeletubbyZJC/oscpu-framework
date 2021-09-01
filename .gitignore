@@ -12,6 +12,8 @@
 !*.mk
 !*.bin
 !*.scala
+!*.elf
+!*.txt
 !Makefile
 !README
 !README.md
