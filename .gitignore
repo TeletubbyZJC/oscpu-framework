@@ -16,7 +16,7 @@
 !*.txt
 !Makefile
 !README
-!README.md
+!*.md
 !LICENSE
 !.gitignore
 **/build/
