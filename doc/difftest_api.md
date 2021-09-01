@@ -4,7 +4,7 @@
 
 ```verilog
 // 触发异常
-`DIFFTEST_MOD_DECL(ArchEvent) (
+module DifftestInstrCommit (
     input        clock,			// 时钟
     input [ 7:0] coreid,		// cpu id，单核时固定为0
     input [31:0] intrNO,		// 中断号
@@ -14,7 +14,7 @@
 );
 
 // 提交指令
-`DIFFTEST_MOD_DECL(InstrCommit)(
+module DifftestArchIntRegState (
     input        clock,
     input [ 7:0] coreid,
     input [ 7:0] index,
@@ -30,7 +30,7 @@
 );
 
 // Trap事件，用于告知difftest程序执行结束
-`DIFFTEST_MOD_DECL(TrapEvent)(
+module DifftestTrapEvent (
     input        clock,
     input [ 7:0] coreid,
     input        valid,			// 执行结束
@@ -41,7 +41,7 @@
 );
 
 // 提交CSR寄存器
-`DIFFTEST_MOD_DECL(CSRState)(
+module DifftestCSRState (
     input        clock,
     input [ 7:0] coreid,
     input [ 1:0] priviledgeMode,// 特权模式
@@ -65,7 +65,7 @@
 );
 
 // 提交通用寄存器
-`DIFFTEST_MOD_DECL(ArchIntRegState)(
+module DifftestArchFpRegState (
     input         clock,
     input [ 7:0]  coreid,
     input [63:0]  gpr_0,
