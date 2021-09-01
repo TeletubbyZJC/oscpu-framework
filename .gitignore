@@ -16,12 +16,13 @@
 !*.txt
 !Makefile
 !README
-!*.md
+!README.md
 !LICENSE
 !.gitignore
 **/build/
 **/build_test/
 **/difftest
+**/out/
 !libraries/difftest
 !libraries/NEMU
 !libraries/DRAMsim3
