@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.17"
+VERSION="1.18"
 
 help() {
     echo "Version v"$VERSION
@@ -31,6 +31,19 @@ create_soft_link() {
     do
         eval "ln -s \"`realpath --relative-to="${1}" "$FILE"`\" \"${1}/${FILE##*/}\" 1>/dev/null 2>&1"
     done
+}
+
+create_bin_soft_link() {
+    find -L $BUILD_PATH -maxdepth 1 -type l -delete
+    FOLDERS=`find bin -mindepth 1 -maxdepth 1 -type d`
+    for FOLDER in ${FOLDERS[@]}
+    do
+        SUBFOLDER=${FOLDER##*/}
+        eval "ln -s \"`realpath --relative-to="$BUILD_PATH" "$OSCPU_PATH/$FOLDER"`\" \"$BUILD_PATH/${FOLDER##*/}\" 1>/dev/null 2>&1"
+    done
+
+    # create soft link ($BUILD_PATH/*.bin -> $OSCPU_PATH/$BIN_FOLDER/*.bin). Why? Because of laziness!
+    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\"
 }
 
 compile_dramsim3() {
@@ -228,11 +241,10 @@ fi
 
 # Simulate
 if [[ "$SIMULATE" == "true" ]]; then
+    create_bin_soft_link
+
     cd $BUILD_PATH
-
-    # create soft link ($BUILD_PATH/*.bin -> $OSCPU_PATH/$BIN_FOLDER/*.bin). Why? Because of laziness!
-    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\"
-
+    
     # run simulation program
     echo "Simulating..."
     [[ "$GDB" == "true" ]] && gdb -s $EMU_FILE --args ./$EMU_FILE $PARAMETERS || ./$EMU_FILE $PARAMETERS
@@ -260,15 +272,7 @@ fi
 
 # Run all
 if [[ -n $TEST_CASES ]]; then
-    find -L $BUILD_PATH -maxdepth 1 -type l -delete
-    FOLDERS=`find bin -mindepth 1 -maxdepth 1 -type d`
-    for FOLDER in ${FOLDERS[@]}
-    do
-        SUBFOLDER=${FOLDER##*/}
-        eval "ln -s \"`realpath --relative-to="$BUILD_PATH" "$OSCPU_PATH/$FOLDER"`\" \"$BUILD_PATH/${FOLDER##*/}\" 1>/dev/null 2>&1"
-    done
-
-    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\"
+    create_bin_soft_link
 
     cd $BUILD_PATH
 
