@@ -33,4 +33,4 @@
 
 ## custom-output
 
-该目录下的测试用例使用`0x7b`指令作为输出指令，，可用于测试CPU指令实现的正确性。CPU在执行该指令时，将`a0`寄存器的值作为[ASCII](https://en.wikipedia.org/wiki/ASCII)字符打印出来。
+该目录下的测试用例使用`0x7b`指令作为输出指令，，可用于测试CPU指令实现的正确性。CPU在执行该指令时，将`a0`寄存器的值作为[ASCII](https://en.wikipedia.org/wiki/ASCII)字符打印出来。其中`interrupt-test`和`rt-thread`需要实现`CLINT`，关于`CLINT`的地址，可以参考[这里](https://chromitem-soc.readthedocs.io/en/latest/clint.html)。
