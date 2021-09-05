@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.18"
+VERSION="1.19"
 
 help() {
     echo "Version v"$VERSION
@@ -54,7 +54,7 @@ compile_dramsim3() {
         cmake -D COSIM=1 ..
         make
         if [ $? -ne 0 ]; then
-            echo "Failed to build dramsim3!!!"
+            echo "Failed to compile dramsim3!!!"
             exit 1
         fi
         cd $OSCPU_PATH
@@ -67,7 +67,7 @@ compile_nemu() {
         make riscv64-ysyx-ref_defconfig
         make
         if [ $? -ne 0 ]; then
-            echo "Failed to build nemu!!!"
+            echo "Failed to compile nemu!!!"
             exit 1
         fi
         cd $OSCPU_PATH
@@ -84,6 +84,10 @@ compile_chisel() {
         cd $PROJECT_PATH
         mkdir vsrc 1>/dev/null 2>&1
         mill -i oscpu.runMain TopMain -td vsrc
+        if [ $? -ne 0 ]; then
+            echo "Failed to compile chisel!!!"
+            exit 1
+        fi
         cd $OSCPU_PATH
     fi
 }
@@ -92,7 +96,7 @@ compile_difftest() {
     cd $DIFFTEST_HOME
     make DESIGN_DIR=$PROJECT_PATH $DIFFTEST_PARAM
     if [ $? -ne 0 ]; then
-        echo "Failed to build difftest!!!"
+        echo "Failed to compile difftest!!!"
         exit 1
     fi
     cd $OSCPU_PATH
@@ -260,11 +264,17 @@ fi
 # Check waveform
 if [[ "$CHECK_WAVE" == "true" ]]; then
     cd $BUILD_PATH
-    gtkwave `ls -t | grep .vcd | head -n 1`
-    if [ $? -ne 0 ]; then
-        echo "Failed to run gtkwave!!!"
-        exit 1
+    WAVE_FILE=`ls -t | grep .vcd | head -n 1`
+    if [ -n "$WAVE_FILE" ]; then
+        gtkwave $WAVE_FILE
+        if [ $? -ne 0 ]; then
+            echo "Failed to run gtkwave!!!"
+            exit 1
+        fi
+    else
+        echo "*.vcd file does not exist!!!"
     fi
+    
     cd $OSCPU_PATH
 fi
 
