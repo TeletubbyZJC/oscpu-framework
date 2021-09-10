@@ -137,7 +137,7 @@ Enter the test cycle:
 ./build.sh -e chisel_cpu_diff -d -s -a "-i inst_diff.bin" -m "EMU_TRACE=1" -b
 ```
 
-### chisel_cpu_diff
+### soc
 
 `projects/soc`目录下存放了接入`ysyxSoC`的示例程序。源码中只有一个占位符，能够通过编译但不能正常运行。
 
