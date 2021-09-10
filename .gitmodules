@@ -7,3 +7,6 @@
 [submodule "libraries/difftest"]
 	path = libraries/difftest
 	url = https://gitee.com/oscpu/difftest.git
+[submodule "libraries/ysyxSoC"]
+	path = libraries/ysyxSoC
+	url = https://github.com/oscpu/ysyxSoC

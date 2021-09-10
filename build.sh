@@ -1,11 +1,11 @@
 #!/bin/bash
 
-VERSION="1.19"
+VERSION="1.20"
 
 help() {
     echo "Version v"$VERSION
     echo "Usage:"
-    echo "build.sh [-e project_name] [-b] [-t top_file] [-s] [-a parameters_list] [-f] [-l] [-g] [-w] [-c] [-d] [-m] [-r test_cases]"
+    echo "build.sh [-e project_name] [-b] [-t top_file] [-s] [-a parameters_list] [-f] [-l] [-g] [-w] [-c] [-d] [-m] [-r test_cases] [-v parameters_list] [-y]"
     echo "Description:"
     echo "-e: Specify a example project. For example: -e counter. If not specified, the default directory \"cpu\" will be used."
     echo "-b: Build project using verilator and make tools automatically. It will generate the \"build\"(difftest) or \"build_test\" subfolder under the project directory."
@@ -20,6 +20,8 @@ help() {
     echo "-d: Connect to XiangShan difftest framework."
     echo "-m: Parameters passed to the difftest makefile. For example: -m \"EMU_TRACE=1 EMU_THREADS=4\". Multiple parameters require double quotes."
     echo "-r: Run all test cases of the specified directory in the \"bin\" directory. For example: -r \"case1 case2\". This option requires the project to be able to connect to difftest."
+    echo "-v: Parameters passed to verilator. For example: -v '--timescale \"1ns/1ns\"'"
+    echo "-y: Connect to ysyx SoC."
     exit 0
 }
 
@@ -115,23 +117,49 @@ build_diff_proj() {
     compile_difftest
 }
 
+build_soc_proj() {
+    mkdir -p $BUILD_PATH/vsrc $BUILD_PATH/csrc
+
+    if [[ ! -f "$PROJECT_PATH/$VSRC_FOLDER/ysyx_${ID:0-6}.v" ]]; then
+        echo "$PROJECT_PATH/$VSRC_FOLDER/ysyx_${ID:0-6}.v not detected. Failed to compile with ysyxSoC."
+        exit 1
+    fi
+
+    cp -f $YSYXSOC_HOME/ysyx/soc/cpu-check.py $BUILD_PATH/
+    sed -i -e "s/input(.*)/\"${ID:0-4}\"/g" $BUILD_PATH/cpu-check.py
+    eval "cd $PROJECT_PATH/$VSRC_FOLDER && python3 $BUILD_PATH/cpu-check.py 1> /dev/null && mv -f cpu-check.log $BUILD_PATH"
+    grep 'fine' $BUILD_PATH/cpu-check.log 1> /dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "Interface check failed. Check $BUILD_FOLDER/cpu-check.log for more details."
+        exit 1
+    fi
+
+    cp -f $YSYXSOC_HOME/ysyx/soc/ysyxSoCFull.v $BUILD_PATH/vsrc/
+    sed -i -e "s/ysyx_000000/ysyx_${ID:0-6}/g" $BUILD_PATH/vsrc/ysyxSoCFull.v
+
+    ln -s $YSYXSOC_HOME/ysyx/peripheral $BUILD_PATH/vsrc/
+    ln -s $YSYXSOC_HOME/ysyx/peripheral/spiFlash $BUILD_PATH/csrc/
+    VSRC_FOLDER+=" $BUILD_PATH/vsrc"
+    CSRC_FOLDER+=" $BUILD_PATH/csrc"
+}
+
 build_proj() {
     cd $PROJECT_PATH
 
     # get all .cpp files
-    CSRC_LIST=`find $PROJECT_PATH/$CSRC_FOLDER -name "*.cpp"`
+    CSRC_LIST=`find -L $PROJECT_PATH/$CSRC_FOLDER -name "*.cpp"`
     for CSRC_FILE in ${CSRC_LIST[@]}
     do
         CSRC_FILES="$CSRC_FILES $CSRC_FILE"
     done
     # get all vsrc subfolders
-    VSRC_SUB_FOLDER=`find $VSRC_FOLDER -type d`
+    VSRC_SUB_FOLDER=`find -L $VSRC_FOLDER -type d`
     for SUBFOLDER in ${VSRC_SUB_FOLDER[@]}
     do
         INCLUDE_VSRC_FOLDERS="$INCLUDE_VSRC_FOLDERS -I$SUBFOLDER"
     done
     # get all csrc subfolders
-    CSRC_SUB_FOLDER=`find $PROJECT_PATH/$CSRC_FOLDER -type d`
+    CSRC_SUB_FOLDER=`find -L $PROJECT_PATH/$CSRC_FOLDER -type d`
     for SUBFOLDER in ${CSRC_SUB_FOLDER[@]}
     do
         INCLUDE_CSRC_FOLDERS="$INCLUDE_CSRC_FOLDERS -I$SUBFOLDER"
@@ -139,7 +167,7 @@ build_proj() {
 
     # compile
     mkdir $BUILD_FOLDER 1>/dev/null 2>&1
-    eval "verilator --x-assign unique --cc --exe --trace --assert -O3 -CFLAGS \"-std=c++11 -Wall $INCLUDE_CSRC_FOLDERS $CFLAGS\" $LDFLAGS -o $PROJECT_PATH/$BUILD_FOLDER/$EMU_FILE \
+    eval "verilator --x-assign unique --cc --exe --trace --assert -O3 $VERILATORFLAGS -CFLAGS \"-std=c++11 -Wall $INCLUDE_CSRC_FOLDERS $CFLAGS\" $LDFLAGS -o $PROJECT_PATH/$BUILD_FOLDER/$EMU_FILE \
         -Mdir $PROJECT_PATH/$BUILD_FOLDER/emu-compile $INCLUDE_VSRC_FOLDERS --build $V_TOP_FILE $CSRC_FILES"
     if [ $? -ne 0 ]; then
         echo "Failed to run verilator!!!"
@@ -176,12 +204,14 @@ DIFFTEST_TOP_FILE="SimTop.v"
 NEMU_PATH=$LIBRARIES_FOLDER"/NEMU"
 DIFFTEST_HELPER_PATH="src/test/vsrc/common"
 DIFFTEST_PARAM=
-TEST_CASES="false"
 DRAMSIM3_FOLDER="libraries/DRAMsim3"
 TEST_CASES=
+YSYXSOC="false"
+YSYXSOC_FOLDER="libraries/ysyxSoC"
+VERILATORFLAGS=
 
 # Check parameters
-while getopts 'he:bt:sa:f:l:gwcdm:r:' OPT; do
+while getopts 'he:bt:sa:f:l:gwcdm:r:yv:' OPT; do
     case $OPT in
         h) help;;
         e) PROJECT_FOLDER="$OPTARG";;
@@ -197,6 +227,8 @@ while getopts 'he:bt:sa:f:l:gwcdm:r:' OPT; do
         d) DIFFTEST="true";;
         m) DIFFTEST_PARAM="$OPTARG";;
         r) TEST_CASES="$OPTARG"; DIFFTEST="true";;
+        y) YSYXSOC="true"; V_TOP_FILE="ysyxSoCFull.v";;
+        v) VERILATORFLAGS="$OPTARG";;
         ?) help;;
     esac
 done
@@ -210,6 +242,7 @@ NEMU_HOME=$OSCPU_PATH/$NEMU_PATH
 DIFFTEST_HOME=$OSCPU_PATH/$DIFFTEST_PATH
 DRAMSIM3_HOME=$OSCPU_PATH/$DRAMSIM3_FOLDER
 LIBRARIES_HOME=$OSCPU_PATH/$LIBRARIES_FOLDER
+YSYXSOC_HOME=$OSCPU_PATH/$YSYXSOC_FOLDER
 export NEMU_HOME=$NEMU_HOME
 export NOOP_HOME=$PROJECT_PATH
 export DRAMSIM3_HOME=$DRAMSIM3_HOME
@@ -233,6 +266,8 @@ fi
 
 # Build project
 if [[ "$BUILD" == "true" ]]; then
+    [[ -d $BUILD_PATH ]] && find $BUILD_PATH -type l -delete
+    [[ "$YSYXSOC" == "true" ]] && build_soc_proj
     [[ "$DIFFTEST" == "true" ]] && build_diff_proj || build_proj
 
     #git commit
