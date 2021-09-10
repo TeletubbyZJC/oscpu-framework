@@ -137,6 +137,18 @@ Enter the test cycle:
 ./build.sh -e chisel_cpu_diff -d -s -a "-i inst_diff.bin" -m "EMU_TRACE=1" -b
 ```
 
+### chisel_cpu_diff
+
+`projects/soc`目录下存放了接入`ysyxSoC`的示例程序。源码中只有一个占位符，能够通过编译但不能正常运行。
+
+使用该脚本，需要先按照 [ysyx SoC 的 readme](https://github.com/osCPU/ysyxsoc) 完成命名规范和 CPU 内部修改两个步骤，得到 `ysyx_21xxxx.v`，随后放入 `projects/soc/vsrc/` 中。脚本会根据 `myinfo.txt` 中的 ID 自动进行 `cpu-check` 和 `soc` 的编译。
+
+`ysyxSoC` 中附带的例程会被自动软连接至 `build` 目录下，仿真时可以如下快速使用。
+
+```bash
+./build.sh -e soc -b -s -y -v '--timescale "1ns/1ns" -Wno-fatal --trace' -a "-i ysyxSoC/flash/hello-flash.bin --dump-wave"
+```
+
 ## 查看波形
 
 在`oscpu`目录下使用命令可以通过`gtkwave`查看输出的波形，其中`xxx`表示例程名。
