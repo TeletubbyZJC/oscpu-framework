@@ -125,7 +125,7 @@ build_soc_proj() {
         exit 1
     fi
 
-    cp -f $YSYXSOC_HOME/ysyx/soc/cpu-check.py $BUILD_PATH/
+    [[ -f $BUILD_PATH/vsrc/cpu-check.py ]] || cp $YSYXSOC_HOME/ysyx/soc/cpu-check.py $BUILD_PATH/
     sed -i -e "s/input(.*)/\"${ID:0-4}\"/g" $BUILD_PATH/cpu-check.py
     eval "cd $PROJECT_PATH/$VSRC_FOLDER && python3 $BUILD_PATH/cpu-check.py 1> /dev/null && mv -f cpu-check.log $BUILD_PATH"
     grep 'fine' $BUILD_PATH/cpu-check.log 1> /dev/null 2>&1
@@ -134,7 +134,7 @@ build_soc_proj() {
         exit 1
     fi
 
-    cp -f $YSYXSOC_HOME/ysyx/soc/ysyxSoCFull.v $BUILD_PATH/vsrc/
+    [[ -f $BUILD_PATH/vsrc/ysyxSoCFull.v ]] || cp $YSYXSOC_HOME/ysyx/soc/ysyxSoCFull.v $BUILD_PATH/vsrc/
     sed -i -e "s/ysyx_000000/ysyx_${ID:0-6}/g" $BUILD_PATH/vsrc/ysyxSoCFull.v
 
     ln -s $YSYXSOC_HOME/ysyx/peripheral $BUILD_PATH/vsrc/
