@@ -121,7 +121,7 @@ build_soc_proj() {
     mkdir -p $BUILD_PATH/vsrc $BUILD_PATH/csrc
 
     if [[ ! -f "$PROJECT_PATH/$VSRC_FOLDER/ysyx_${ID:0-6}.v" ]]; then
-        echo "$PROJECT_PATH/$VSRC_FOLDER/ysyx_${ID:0-6}.v not detected. Failed to compile with ysyxSoC."
+        echo "$VSRC_FOLDER/ysyx_${ID:0-6}.v not detected. Please follow the README of ysyxSoC to get this file."
         exit 1
     fi
 

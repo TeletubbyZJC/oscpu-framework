@@ -19,10 +19,10 @@ public:
 
     if (args.image == nullptr)
       throw "Image file unspecified. Use -i to provide the image of flash";
+    printf("Initializing flash with \"%s\" ...\n", args.image);
     flash_init(args.image);
-    printf("Flash initialized with \"%s\"\n", args.image);
 
-    printf("Initializing DUT...\n");
+    printf("Initializing and resetting DUT ...\n");
     dut_ptr = new VysyxSoCFull;
     dut_ptr->reset = 1;
     for (int i = 0; i < 10; i++)

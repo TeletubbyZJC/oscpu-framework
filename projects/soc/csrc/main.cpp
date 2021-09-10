@@ -15,7 +15,7 @@ void sig_handler(int signo)
         puts("SIGINT received, forcely shutting down.\n");
         _exit(0);
     }
-    puts("SIGINT received, gracefully shutting down...\n");
+    puts("SIGINT received, gracefully shutting down... Type Ctrl+C again to stop forcely.\n");
     signal_received = signo;
 }
 
@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
     atexit(release);
 
     emu = new Emulator(argc, argv);
+    printf("Start simulating ...\n");
     while (!Verilated::gotFinish() && signal_received == 0)
     {
         emu->step();
