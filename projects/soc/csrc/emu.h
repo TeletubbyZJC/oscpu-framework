@@ -18,7 +18,10 @@ public:
     parseArgs(argc, argv);
 
     if (args.image == nullptr)
-      throw "Image file unspecified. Use -i to provide the image of flash";
+    {
+      printf("Image file unspecified. Use -i to provide the image of flash");
+      exit(1);
+    }
     printf("Initializing flash with \"%s\" ...\n", args.image);
     flash_init(args.image);
 
@@ -39,7 +42,7 @@ public:
     if (args.dump_wave)
     {
       Verilated::traceEverOn(true);
-      printf("Enabling waves ...\n");
+      printf("`dump-wave` enabled, waves will be written to \"vlt_dump.vcd\".\n");
       fp = new VerilatedVcdC;
       dut_ptr->trace(fp, 1);
       fp->open("vlt_dump.vcd");
@@ -64,6 +67,11 @@ public:
       fp->dump((vluint64_t)cycle);
     dut_ptr->clock = 0;
     dut_ptr->eval();
+  }
+
+  unsigned long long get_cycle()
+  {
+    return cycle;
   }
 
 private:
@@ -124,6 +132,7 @@ private:
   }
 
   unsigned long long cycle = 0;
+
   struct Args
   {
     bool dump_wave = false;
