@@ -4,17 +4,17 @@
 
 ```verilog
 // 触发异常
-module DifftestInstrCommit (
+module DifftestArchEvent (
     input        clock,			// 时钟
     input [ 7:0] coreid,		// cpu id，单核时固定为0
-    input [31:0] intrNO,		// 中断号
-    input [31:0] cause,			// 异常号
+    input [31:0] intrNO,		// 中断号，非0时产生中断。产生中断的时钟周期中，DifftestInstrCommit提交的valid需为0
+    input [31:0] cause,			// 异常号，ecall时不需要考虑
     input [63:0] exceptionPC,	// 产生异常时的PC
     input [31:0] exceptionInst	// 产生异常时的指令
 );
 
 // 提交指令
-module DifftestArchIntRegState (
+module DifftestInstrCommit (
     input        clock,
     input [ 7:0] coreid,
     input [ 7:0] index,
