@@ -57,7 +57,8 @@ push_repo() {
     else
         INPUT=$URL
     fi
-
+    
+    git add .
     git commit -m "dc & vcs" --no-verify --allow-empty 1>/dev/null 2>&1
 
     git push origin
