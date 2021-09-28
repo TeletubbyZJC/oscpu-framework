@@ -27,4 +27,5 @@
 !libraries/difftest
 !libraries/NEMU
 !libraries/DRAMsim3
+!submit/*
 myinfo.txt
