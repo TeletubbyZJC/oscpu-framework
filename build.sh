@@ -140,6 +140,7 @@ build_soc_proj() {
     fi
 
     ln -s $YSYXSOC_HOME/ysyx/peripheral $BUILD_PATH/vsrc/
+    ln -s $YSYXSOC_HOME/ysyx/ram $BUILD_PATH/vsrc/
     ln -s $YSYXSOC_HOME/ysyx/peripheral/spiFlash $BUILD_PATH/csrc/
     VSRC_FOLDER+=" $BUILD_PATH/vsrc"
     CSRC_FOLDER+=" $BUILD_PATH/csrc"
