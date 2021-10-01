@@ -28,4 +28,5 @@
 !libraries/NEMU
 !libraries/DRAMsim3
 !submit/*
+!*.xlsx
 myinfo.txt
