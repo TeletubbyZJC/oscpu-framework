@@ -36,6 +36,7 @@ class Core extends Module {
   dt_ic.io.valid    := true.B
   dt_ic.io.pc       := RegNext(fetch.io.pc)
   dt_ic.io.instr    := RegNext(fetch.io.inst)
+  dt_ic.io.special  := 0.U
   dt_ic.io.skip     := false.B
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
