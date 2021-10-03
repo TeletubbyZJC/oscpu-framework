@@ -84,6 +84,7 @@ PREFIX="ysyx_${ID:0-6}"
 V_FILE=$PREFIX".v"
 PDF_FILE=$PREFIX".pdf"
 
+check_file "rtthread-loader.png"
 check_file $WARNGING_FILE
 check_file $PREFIX".pdf"
 copy_v_file $PREFIX".v"
