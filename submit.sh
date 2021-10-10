@@ -11,12 +11,17 @@ get_id() {
     ID="${ID##*\r}"
 }
 
-copy_v_file() {
-    if [[ ! -f $OSCPU_PATH/projects/soc/vsrc/${1} ]]; then
-        printf "Please place \e[1;31m%s\e[0m in \e[1;31m%s\e[0m.\n" ${1} $OSCPU_PATH/projects/soc/vsrc/
-        exit 1
-    fi
-    cp $OSCPU_PATH/projects/soc/vsrc/${1} $SUBMIT_FLODER/
+copy_src_file() {
+    for FILE in $*                     
+    do
+        if [[ -f $OSCPU_PATH/projects/soc/vsrc/$FILE ]]; then
+            cp $OSCPU_PATH/projects/soc/vsrc/$FILE $SUBMIT_FLODER/
+            return
+        fi
+    done
+
+    printf "Please place \e[1;31m%s\e[0m in \e[1;31m%s\e[0m.\n" ${1} $OSCPU_PATH/projects/soc/vsrc/
+    exit 1
 }
 
 check_file() {
@@ -47,8 +52,17 @@ get_default_url() {
     done
 }
 
+add_remote_url() {
+    git remote add origin $1
+}
+
 push_repo() {
     URL="$(get_default_url $1)"
+
+    if [[ ! -n "$URL" ]]; then
+        add_remote_url https://gitee.com/oscpu/oscpu-framework.git
+        URL="https://gitee.com/oscpu/oscpu-framework.git"
+    fi
 
     printf "Enter a new URL to replace the default push URL(\e[1;34m%s\e[0m) or leave a blank to skip.\n" $URL
     read -p "Enter your new push URL: " -e INPUT
@@ -81,13 +95,11 @@ get_id
 printf "Read ID \e[1;32m%s\e[0m from myinfo.txt\n" $ID
 
 PREFIX="ysyx_${ID:0-6}"
-V_FILE=$PREFIX".v"
 PDF_FILE=$PREFIX".pdf"
 
-check_file "rtthread-loader.png"
 check_file $WARNGING_FILE
-check_file $PREFIX".pdf"
-copy_v_file $PREFIX".v"
+check_file $PDF_FILE
+copy_src_file $PREFIX".v" $PREFIX".sv"
 
 cpu_check
 push_repo

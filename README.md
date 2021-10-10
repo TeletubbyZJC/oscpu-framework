@@ -191,13 +191,14 @@ Usage: ./emu [OPTION...]
 
 在本框架中接入`ysyxSoC` 并完成所有测试后，可以开始代码上传流程。**上传前请确保所有触发器可复位。** 
 
-1. 将成功运行正常模式`rtthread-loader.bin`的截图文件`rtthread-loader.png`放置于`submit`目录下。
+1. 每次提交前，重新接入总线后的回归测试，并将成功运行的截图文件`reg-testing.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
+1. 每次提交前，重新运行正常模式的`rtthread-loader.bin`，并将成功运行的截图文件`rtthread-loader.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
 1. 如果实现了`cache`，填写`doc`目录下的`cache规格.xlsx`并拷贝至`submit`目录下。
 1. 根据[代码规范检查步骤](https://github.com/OSCPU/ysyxSoC/blob/master/ysyx/lint/README.md)填写`Verilator中Warning无法清理说明.xlsx`文件并拷贝至`submit`目录下。
 1. 制作一份带数据流向的处理器架构图，并对图中各模块做简单说明，整理成`ysyx_21xxxx.pdf`文件并放置于`submit`目录下。
 1. 创建自己的`gitee`开源仓库。
 1. 进入`oscpu`目录下，运行`./submit.sh`，根据提示将代码上传至创建的`gitee`开源仓库。
-1. 将自己仓库的`HTTPS`格式的`URL`和学号发送给组内助教以完成第一次代码提交。后续提交只需要重新运行`./submit.sh`即可。
+1. 将自己仓库的`HTTPS`格式的`URL`(例如：`https://gitee.com/oscpu/oscpu-framework.git`)和学号发送给组内助教以完成第一次代码提交。后续提交只需要重新运行`./submit.sh`即可，无需通知助教。
 
 后续提交不可修改cache规格，只能根据report反馈修复bug。SoC和后端团队将定期检查新提交的代码，进行综合和仿真测试，并将结果以日志报告的形式上传至ysyx_submit仓库，具体说明请参考[ysyx_submit仓库](https://github.com/OSCPU/ysyx_submit/)的说明文档。
 
