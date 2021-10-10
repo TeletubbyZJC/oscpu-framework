@@ -191,6 +191,7 @@ Usage: ./emu [OPTION...]
 
 在本框架中接入`ysyxSoC` 并完成所有测试后，可以开始代码上传流程。**上传前请确保所有触发器可复位。** 
 
+1. 每次提交前，确保同步了最新的`oscpu-framework`仓库。
 1. 每次提交前，重新接入总线后的回归测试，并将成功运行的截图文件`reg-testing.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
 1. 每次提交前，重新运行正常模式的`rtthread-loader.bin`，并将成功运行的截图文件`rtthread-loader.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
 1. 如果实现了`cache`，填写`doc`目录下的`cache规格.xlsx`并拷贝至`submit`目录下。
