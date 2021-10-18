@@ -194,7 +194,7 @@ Usage: ./emu [OPTION...]
 1. 每次提交前，确保同步了最新的`oscpu-framework`仓库。
 1. 每次提交前，重新接入总线后的回归测试，并将成功运行的截图文件`reg-testing.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
 1. 每次提交前，重新运行正常模式的`rtthread-loader.bin`，并将成功运行的截图文件`rtthread-loader.png`放置于`submit`目录下，截图中必须包含使用`date`命令输出的当前时间。
-1. 将`.v`代码里所有的宏加上`[学号后六位]_`作为前缀，例如`define 210001_PC_START  64'h80000000`。
+1. 将`.v`代码里所有的宏加上`YSYX210xxx_`作为前缀，例如`define YSYX210001_PC_START  64'h80000000`。
 1. 如果实现了`cache`，填写`doc`目录下的`cache规格.xlsx`并拷贝至`submit`目录下。
 1. 根据[代码规范检查步骤](https://github.com/OSCPU/ysyxSoC/blob/master/ysyx/lint/README.md)填写`Verilator中Warning无法清理说明.xlsx`文件并拷贝至`submit`目录下。
 1. 制作一份带数据流向的处理器架构图，并对图中各模块做简单说明，整理成`ysyx_21xxxx.pdf`文件并放置于`submit`目录下。
