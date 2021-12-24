@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.21"
+VERSION="1.22"
 
 help() {
     echo "Version v"$VERSION
@@ -113,6 +113,8 @@ build_diff_proj() {
     touch -m `find $PROJECT_PATH/$VSRC_FOLDER -name $DIFFTEST_TOP_FILE` 1>/dev/null 2>&1
     # create soft link ($BUILD_PATH/*.v -> $PROJECT_PATH/$VSRC_FOLDER/*.v)
     create_soft_link $BUILD_PATH $PROJECT_PATH/$VSRC_FOLDER \"*.v\"
+    # create soft link ($BUILD_PATH/*.v -> $PROJECT_PATH/ysyx/ram/*.v)
+    create_soft_link $BUILD_PATH $YSYXSOC_HOME/ysyx/ram \"*.v\"
 
     compile_difftest
 }
@@ -157,12 +159,15 @@ build_proj() {
     do
         CSRC_FILES="$CSRC_FILES $CSRC_FILE"
     done
+    
     # get all vsrc subfolders
     VSRC_SUB_FOLDER=`find -L $VSRC_FOLDER -type d`
     for SUBFOLDER in ${VSRC_SUB_FOLDER[@]}
     do
         INCLUDE_VSRC_FOLDERS="$INCLUDE_VSRC_FOLDERS -I$SUBFOLDER"
     done
+    INCLUDE_VSRC_FOLDERS="$INCLUDE_VSRC_FOLDERS -I$YSYXSOC_HOME/ysyx/ram"
+
     # get all csrc subfolders
     CSRC_SUB_FOLDER=`find -L $PROJECT_PATH/$CSRC_FOLDER -type d`
     for SUBFOLDER in ${CSRC_SUB_FOLDER[@]}
