@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.22"
+VERSION="1.23"
 
 help() {
     echo "Version v"$VERSION
@@ -28,7 +28,7 @@ help() {
 create_soft_link() {
     mkdir ${1} 1>/dev/null 2>&1
     find -L ${1} -type l -delete
-    FILES=`eval "find ${2} -mindepth 1 -maxdepth 1 -name ${3}"`
+    FILES=`eval "find ${2} -mindepth ${4} -maxdepth ${5} -name ${3}"`
     for FILE in ${FILES[@]}
     do
         eval "ln -s \"`realpath --relative-to="${1}" "$FILE"`\" \"${1}/${FILE##*/}\" 1>/dev/null 2>&1"
@@ -45,7 +45,7 @@ create_bin_soft_link() {
     done
 
     # create soft link ($BUILD_PATH/*.bin -> $OSCPU_PATH/$BIN_FOLDER/*.bin). Why? Because of laziness!
-    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\"
+    create_soft_link $BUILD_PATH $OSCPU_PATH/$BIN_FOLDER \"*.bin\" 1 1
 }
 
 compile_dramsim3() {
@@ -112,9 +112,9 @@ build_diff_proj() {
     # Refresh the modification time of the top file, otherwise some changes to the RTL source code will not take effect in next compilation.
     touch -m `find $PROJECT_PATH/$VSRC_FOLDER -name $DIFFTEST_TOP_FILE` 1>/dev/null 2>&1
     # create soft link ($BUILD_PATH/*.v -> $PROJECT_PATH/$VSRC_FOLDER/*.v)
-    create_soft_link $BUILD_PATH $PROJECT_PATH/$VSRC_FOLDER \"*.v\"
+    create_soft_link $BUILD_PATH $PROJECT_PATH/$VSRC_FOLDER \"*.v\" 1 10
     # create soft link ($BUILD_PATH/*.v -> $PROJECT_PATH/ysyx/ram/*.v)
-    create_soft_link $BUILD_PATH $YSYXSOC_HOME/ysyx/ram \"*.v\"
+    create_soft_link $BUILD_PATH $YSYXSOC_HOME/ysyx/ram \"*.v\" 1 1
 
     compile_difftest
 }
