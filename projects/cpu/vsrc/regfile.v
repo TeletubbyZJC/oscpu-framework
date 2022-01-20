@@ -15,7 +15,9 @@ module regfile(
 	
 	input  wire  [4  : 0] r_addr2,
 	output reg   [`REG_BUS] r_data2,
-	input  wire 		  r_ena2
+	input  wire 		  r_ena2,
+
+	output wire [`REG_BUS] regs_o[0 : 31]        // difftest
     );
 
     // 32 registers
@@ -82,5 +84,12 @@ module regfile(
 		else
 			r_data2 = `ZERO_WORD;
 	end
+
+	genvar i;
+	generate
+		for (i = 0; i < 32; i = i + 1) begin
+			assign regs_o[i] = (w_ena & w_addr == i & i != 0) ? w_data : regs[i];
+		end
+	endgenerate
 
 endmodule
